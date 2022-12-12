@@ -1,25 +1,53 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+export default function App() {
 
-function App() {
+  const [repositories, setRepositories] = useState([]);
+  const [userGit, setUserGit] = useState('');
+
+  const verRepositorios = () => {
+    const FetchData = async () => {
+      const response = await fetch(`https://api.github.com/users/${userGit}/repos`);
+      const data = await response.json();
+      setRepositories(data);
+      }
+      FetchData();
+  }
+
+
+  useEffect( () => {
+    const filtered = repositories.filter( repo => repo.favorite);
+    document.title = `Você tem ${filtered.length} repo favoritos`;
+  }, [repositories])
+  
+
+  const handleFavorite = (id) => {
+    const newRepositories = repositories.map( repo => {
+      return repo.id === id ? { ...repo, favorite: !repo.favorite} : repo
+    }); 
+    setRepositories(newRepositories);
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <>
+        <section>
+          <label>Seu github</label>
+          <input value={userGit} onChange={(e) => setUserGit(e.target.value)} placeholder="Digite seu user"></input>
+          <button onClick={verRepositorios}>Ver seus repositorios</button>
+        </section>
+        <ul> 
+          {repositories.map(repo => (
+            <li key={repo.id}>
+              {repo.name}
+              {repo.favorite && <span>(favorito)</span>}
+              <button onClick={() => handleFavorite(repo.id)}>Favoritar</button>
+            </li>
+          ))}
+        </ul>
+      </>
+      
     </div>
   );
 }
 
-export default App;
+
